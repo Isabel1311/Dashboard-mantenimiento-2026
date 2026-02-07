@@ -642,4 +642,4 @@ with tab4:
             st.write(dff[['Importe','Importe IVA','Dias_Atencion']].describe().round(2))
 
 st.markdown("---")
-st.markdown('<div style="text-align:center;color:#999;font-size:0.75rem;">BBVA Conservación NE · Centro de Análisis · Dirección de Administración y Operaciones</div>', True)
+st.markdown('<div style="text-align:center;color:#999;font-size:0.75rem;">BBVA Conservación NE · Centro de Análisis · Dirección de Administración y Operaciones || M.O.D.E: Isabel Díaz</div>', True)
