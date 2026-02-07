@@ -602,8 +602,8 @@ with tab4:
 
     st.dataframe(dd.rename(columns={'Supervisor_Asignado':'Supervisor','Estatus_Desc':'Estatus','Tipo_Banca':'Tipo Banca'}),
                  use_container_width=True, hide_index=True, height=600, column_config={
-                     "Importe": st.column_config.NumberColumn(format="$ %,.2f"),
-                     "Importe IVA": st.column_config.NumberColumn(format="$ %,.2f"),
+                     "Importe": st.column_config.NumberColumn("Importe", format="$%,.2f"),
+                     "Importe IVA": st.column_config.NumberColumn("Importe IVA", format="$%,.2f"),
                      "Fecha de creación": st.column_config.DateColumn(format="DD/MM/YYYY"),
                      "Fecha de atención": st.column_config.DateColumn(format="DD/MM/YYYY"),
                      "Fecha de realización": st.column_config.DateColumn(format="DD/MM/YYYY"),
