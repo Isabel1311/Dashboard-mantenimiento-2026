@@ -421,7 +421,7 @@ with tab2:
             psu = dpv.groupby('Supervisor_Asignado').agg(Ordenes=('Orden','count'), Importe=('Importe','sum'), Sucursales=('Denominación','nunique')).sort_values('Ordenes', ascending=False).reset_index()
             psu['Importe'] = psu['Importe'].round(2)
             st.dataframe(psu.rename(columns={'Supervisor_Asignado':'Supervisor'}), use_container_width=True, hide_index=True,
-                        column_config={"Importe": st.column_config.NumberColumn(format="$%,.2f")})
+                        column_config={"Importe": st.column_config.NumberColumn(format="$ %,.2f")})
 
         st.markdown('<div class="section-header">⚖️ Comparativa General de Proveedores</div>', True)
         cpv = dff.groupby('Proveedor').agg(
@@ -438,9 +438,9 @@ with tab2:
         cpv['% Correctivas'] = (cpv['Correctivas']/cpv['Total_Ordenes']*100).round(1)
         cpv['% Preventivas'] = (cpv['Preventivas']/cpv['Total_Ordenes']*100).round(1)
         st.dataframe(cpv, use_container_width=True, hide_index=True, column_config={
-            "Importe_Total": st.column_config.NumberColumn("Importe Total", format="$%,.2f"),
-            "Importe_IVA": st.column_config.NumberColumn("Importe IVA", format="$%,.2f"),
-            "Importe_Promedio": st.column_config.NumberColumn("Importe Prom.", format="$%,.2f"),
+            "Importe_Total": st.column_config.NumberColumn("Importe Total", format="$ %,.2f"),
+            "Importe_IVA": st.column_config.NumberColumn("Importe IVA", format="$ %,.2f"),
+            "Importe_Promedio": st.column_config.NumberColumn("Importe Prom.", format="$ %,.2f"),
             "Dias_Atencion_Prom": st.column_config.NumberColumn("Días Atención", format="%.1f días"),
             "% Correctivas": st.column_config.NumberColumn(format="%.1f %%"),
             "% Preventivas": st.column_config.NumberColumn(format="%.1f %%"),
@@ -530,7 +530,12 @@ with tab3:
             ).sort_values('Total_Ordenes', ascending=False).reset_index()
             ssd['Importe_Total'] = ssd['Importe_Total'].round(2)
             st.dataframe(ssd.rename(columns={'Denominación':'Sucursal'}), use_container_width=True, hide_index=True,
-                        column_config={"Importe_Total": st.column_config.NumberColumn("Importe Total", format="$%,.2f")})
+                        column_config={
+                            "Importe_Total": st.column_config.NumberColumn("Importe Total", format="$ %,.2f"),
+                            "Total_Ordenes": st.column_config.NumberColumn("Total Órdenes", format="%d"),
+                            "Correctivas": st.column_config.NumberColumn(format="%d"),
+                            "Preventivas": st.column_config.NumberColumn(format="%d")
+                        })
 
         # Comparativa supervisores
         st.markdown('<div class="section-header">⚖️ Comparativa General de Supervisores</div>', True)
@@ -549,9 +554,15 @@ with tab3:
         csv2['% Correctivas'] = (csv2['Correctivas']/csv2['Total_Ordenes']*100).round(1)
         csv2['% Preventivas'] = (csv2['Preventivas']/csv2['Total_Ordenes']*100).round(1)
         st.dataframe(csv2.rename(columns={'Supervisor_Asignado':'Supervisor'}), use_container_width=True, hide_index=True, column_config={
-            "Importe_Total": st.column_config.NumberColumn("Importe Total", format="$%,.2f"),
-            "Importe_IVA": st.column_config.NumberColumn("Importe IVA", format="$%,.2f"),
-            "Importe_Promedio": st.column_config.NumberColumn("Importe Prom.", format="$%,.2f"),
+            "Total_Ordenes": st.column_config.NumberColumn("Total Órdenes", format="%d"),
+            "Importe_Total": st.column_config.NumberColumn("Importe Total", format="$ %,.2f"),
+            "Importe_IVA": st.column_config.NumberColumn("Importe IVA", format="$ %,.2f"),
+            "Importe_Promedio": st.column_config.NumberColumn("Importe Prom.", format="$ %,.2f"),
+            "Correctivas": st.column_config.NumberColumn(format="%d"),
+            "Preventivas": st.column_config.NumberColumn(format="%d"),
+            "Proveedores": st.column_config.NumberColumn(format="%d"),
+            "Sucursales": st.column_config.NumberColumn(format="%d"),
+            "Zonas": st.column_config.NumberColumn(format="%d"),
             "Dias_Atencion_Prom": st.column_config.NumberColumn("Días Atención", format="%.1f días"),
             "% Correctivas": st.column_config.NumberColumn(format="%.1f %%"),
             "% Preventivas": st.column_config.NumberColumn(format="%.1f %%"),
@@ -602,8 +613,8 @@ with tab4:
 
     st.dataframe(dd.rename(columns={'Supervisor_Asignado':'Supervisor','Estatus_Desc':'Estatus','Tipo_Banca':'Tipo Banca'}),
                  use_container_width=True, hide_index=True, height=600, column_config={
-                     "Importe": st.column_config.NumberColumn(format="$%,.2f"),
-                     "Importe IVA": st.column_config.NumberColumn(format="$%,.2f"),
+                     "Importe": st.column_config.NumberColumn(format="$ %,.2f"),
+                     "Importe IVA": st.column_config.NumberColumn(format="$ %,.2f"),
                      "Fecha de creación": st.column_config.DateColumn(format="DD/MM/YYYY"),
                      "Fecha de atención": st.column_config.DateColumn(format="DD/MM/YYYY"),
                      "Fecha de realización": st.column_config.DateColumn(format="DD/MM/YYYY"),
