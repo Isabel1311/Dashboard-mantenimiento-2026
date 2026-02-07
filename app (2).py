@@ -202,6 +202,15 @@ def format_currency(val):
     if val >= 1_000: return f"${val/1_000:,.1f}K"
     return f"${val:,.0f}"
 
+def format_money(val):
+    """Formatea números como moneda con separador de miles"""
+    try:
+        if pd.isna(val):
+            return "$ 0.00"
+        return f"$ {float(val):,.2f}"
+    except:
+        return "$ 0.00"
+
 BBVA_COLORS = ['#004481','#0066b2','#1a8fe3','#5bbad5','#00a651','#7b2d8e','#ff9500','#e63946','#0097a7','#f4a261','#2a9d8f','#e76f51']
 
 
@@ -420,8 +429,8 @@ with tab2:
             st.markdown('<div class="section-header">👷 Supervisores Asociados</div>', True)
             psu = dpv.groupby('Supervisor_Asignado').agg(Ordenes=('Orden','count'), Importe=('Importe','sum'), Sucursales=('Denominación','nunique')).sort_values('Ordenes', ascending=False).reset_index()
             psu['Importe'] = psu['Importe'].round(2)
-            st.dataframe(psu.rename(columns={'Supervisor_Asignado':'Supervisor'}), use_container_width=True, hide_index=True,
-                        column_config={"Importe": st.column_config.NumberColumn(format="$ %,.2f")})
+            psu['Importe_Format'] = psu['Importe'].apply(format_money)
+            st.dataframe(psu.rename(columns={'Supervisor_Asignado':'Supervisor', 'Importe_Format': 'Importe'}).drop('Importe', axis=1), use_container_width=True, hide_index=True)
 
         st.markdown('<div class="section-header">⚖️ Comparativa General de Proveedores</div>', True)
         cpv = dff.groupby('Proveedor').agg(
@@ -437,14 +446,17 @@ with tab2:
         cpv['Dias_Atencion_Prom'] = cpv['Dias_Atencion_Prom'].round(1)
         cpv['% Correctivas'] = (cpv['Correctivas']/cpv['Total_Ordenes']*100).round(1)
         cpv['% Preventivas'] = (cpv['Preventivas']/cpv['Total_Ordenes']*100).round(1)
-        st.dataframe(cpv, use_container_width=True, hide_index=True, column_config={
-            "Importe_Total": st.column_config.NumberColumn("Importe Total", format="$ %,.2f"),
-            "Importe_IVA": st.column_config.NumberColumn("Importe IVA", format="$ %,.2f"),
-            "Importe_Promedio": st.column_config.NumberColumn("Importe Prom.", format="$ %,.2f"),
-            "Dias_Atencion_Prom": st.column_config.NumberColumn("Días Atención", format="%.1f días"),
-            "% Correctivas": st.column_config.NumberColumn(format="%.1f %%"),
-            "% Preventivas": st.column_config.NumberColumn(format="%.1f %%"),
+        # Formatear moneda
+        cpv['Importe_Total_Format'] = cpv['Importe_Total'].apply(format_money)
+        cpv['Importe_IVA_Format'] = cpv['Importe_IVA'].apply(format_money)
+        cpv['Importe_Promedio_Format'] = cpv['Importe_Promedio'].apply(format_money)
+        # Mostrar tabla sin columnas originales de importe
+        cpv_display = cpv.drop(columns=['Importe_Total', 'Importe_IVA', 'Importe_Promedio']).rename(columns={
+            'Importe_Total_Format': 'Importe Total',
+            'Importe_IVA_Format': 'Importe IVA',
+            'Importe_Promedio_Format': 'Importe Prom.'
         })
+        st.dataframe(cpv_display, use_container_width=True, hide_index=True)
 
 
 # ── TAB 3: SUPERVISOR ──
@@ -529,13 +541,9 @@ with tab3:
                 Importe_Total=('Importe','sum')
             ).sort_values('Total_Ordenes', ascending=False).reset_index()
             ssd['Importe_Total'] = ssd['Importe_Total'].round(2)
-            st.dataframe(ssd.rename(columns={'Denominación':'Sucursal'}), use_container_width=True, hide_index=True,
-                        column_config={
-                            "Importe_Total": st.column_config.NumberColumn("Importe Total", format="$ %,.2f"),
-                            "Total_Ordenes": st.column_config.NumberColumn("Total Órdenes", format="%d"),
-                            "Correctivas": st.column_config.NumberColumn(format="%d"),
-                            "Preventivas": st.column_config.NumberColumn(format="%d")
-                        })
+            ssd['Importe_Format'] = ssd['Importe_Total'].apply(format_money)
+            ssd_display = ssd.drop('Importe_Total', axis=1).rename(columns={'Denominación':'Sucursal', 'Importe_Format': 'Importe Total'})
+            st.dataframe(ssd_display, use_container_width=True, hide_index=True)
 
         # Comparativa supervisores
         st.markdown('<div class="section-header">⚖️ Comparativa General de Supervisores</div>', True)
@@ -553,20 +561,18 @@ with tab3:
         csv2['Dias_Atencion_Prom'] = csv2['Dias_Atencion_Prom'].round(1)
         csv2['% Correctivas'] = (csv2['Correctivas']/csv2['Total_Ordenes']*100).round(1)
         csv2['% Preventivas'] = (csv2['Preventivas']/csv2['Total_Ordenes']*100).round(1)
-        st.dataframe(csv2.rename(columns={'Supervisor_Asignado':'Supervisor'}), use_container_width=True, hide_index=True, column_config={
-            "Total_Ordenes": st.column_config.NumberColumn("Total Órdenes", format="%d"),
-            "Importe_Total": st.column_config.NumberColumn("Importe Total", format="$ %,.2f"),
-            "Importe_IVA": st.column_config.NumberColumn("Importe IVA", format="$ %,.2f"),
-            "Importe_Promedio": st.column_config.NumberColumn("Importe Prom.", format="$ %,.2f"),
-            "Correctivas": st.column_config.NumberColumn(format="%d"),
-            "Preventivas": st.column_config.NumberColumn(format="%d"),
-            "Proveedores": st.column_config.NumberColumn(format="%d"),
-            "Sucursales": st.column_config.NumberColumn(format="%d"),
-            "Zonas": st.column_config.NumberColumn(format="%d"),
-            "Dias_Atencion_Prom": st.column_config.NumberColumn("Días Atención", format="%.1f días"),
-            "% Correctivas": st.column_config.NumberColumn(format="%.1f %%"),
-            "% Preventivas": st.column_config.NumberColumn(format="%.1f %%"),
+        # Formatear moneda
+        csv2['Importe_Total_Format'] = csv2['Importe_Total'].apply(format_money)
+        csv2['Importe_IVA_Format'] = csv2['Importe_IVA'].apply(format_money)
+        csv2['Importe_Promedio_Format'] = csv2['Importe_Promedio'].apply(format_money)
+        # Mostrar tabla sin columnas originales de importe
+        csv2_display = csv2.drop(columns=['Importe_Total', 'Importe_IVA', 'Importe_Promedio']).rename(columns={
+            'Supervisor_Asignado': 'Supervisor',
+            'Importe_Total_Format': 'Importe Total',
+            'Importe_IVA_Format': 'Importe IVA',
+            'Importe_Promedio_Format': 'Importe Prom.'
         })
+        st.dataframe(csv2_display, use_container_width=True, hide_index=True)
 
         st.markdown("")
         cc1, cc2 = st.columns(2)
@@ -611,10 +617,16 @@ with tab4:
         dd = dd[mask]
         st.markdown(f"*{len(dd)} resultados*")
 
-    st.dataframe(dd.rename(columns={'Supervisor_Asignado':'Supervisor','Estatus_Desc':'Estatus','Tipo_Banca':'Tipo Banca'}),
+    # Formatear columnas de importe
+    dd['Importe_Format'] = dd['Importe'].apply(format_money)
+    dd['Importe IVA_Format'] = dd['Importe IVA'].apply(format_money)
+    dd_display = dd.drop(columns=['Importe', 'Importe IVA']).rename(columns={
+        'Importe_Format': 'Importe',
+        'Importe IVA_Format': 'Importe IVA'
+    }).rename(columns={'Supervisor_Asignado':'Supervisor','Estatus_Desc':'Estatus','Tipo_Banca':'Tipo Banca'})
+    
+    st.dataframe(dd_display,
                  use_container_width=True, hide_index=True, height=600, column_config={
-                     "Importe": st.column_config.NumberColumn(format="$ %,.2f"),
-                     "Importe IVA": st.column_config.NumberColumn(format="$ %,.2f"),
                      "Fecha de creación": st.column_config.DateColumn(format="DD/MM/YYYY"),
                      "Fecha de atención": st.column_config.DateColumn(format="DD/MM/YYYY"),
                      "Fecha de realización": st.column_config.DateColumn(format="DD/MM/YYYY"),
